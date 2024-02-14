@@ -143,9 +143,20 @@ def infer_stack_structure(
 ) -> Mapping[str, Sequence[InferredTileResult]]:
     results: MutableMapping[str, MutableSequence[InferredTileResult]] = \
         collections.defaultdict(list)
+    
+    if basepath.is_dir():
+        path_list = basepath.glob("**/*")
+    elif basepath.is_file():
+        with basepath.open() as file:
+            lines = file.readlines()
+        path_list = [line.strip() for line in lines]
 
-    for path in basepath.glob("**/*"):
-        mo = FILENAME_CRE.match(path.name)
+    for path in path_list:
+        try:
+            mo = FILENAME_CRE.match(path.name)
+        except:
+            mo = FILENAME_CRE.match(os.path.basename(path))
+
         if mo is None:
             continue
         try:
